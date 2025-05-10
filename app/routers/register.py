@@ -43,4 +43,7 @@ def debug_user(email: str, db: Session = Depends(get_db)):
         "email": user.email,
         "password_hash": user.password_hash
     }
+@router.get("/debug/users-all")
+def debug_users_all(db: Session = Depends(get_db)):
+    return [user.email for user in db.query(User).all()]
 
