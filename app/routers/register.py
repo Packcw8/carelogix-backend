@@ -33,3 +33,14 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 @router.get("/agencies")
 def list_agencies(db: Session = Depends(get_db)):
     return [{"id": agency.id, "name": agency.name} for agency in db.query(Agency).all()]
+
+@router.get("/debug/user/{email}")
+def debug_user(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter_by(email=email).first()
+    if not user:
+        return {"error": "User not found"}
+    return {
+        "email": user.email,
+        "password_hash": user.password_hash
+    }
+
