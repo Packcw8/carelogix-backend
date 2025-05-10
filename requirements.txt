@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+docxtpl
 pydantic
 sqlalchemy
 python-multipart
@@ -8,4 +9,5 @@ python-jose
 aiofiles
 jinja2
 email-validator
+
 
