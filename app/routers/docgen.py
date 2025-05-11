@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import FileResponse
 from app.auth.auth_dependencies import get_current_user
 from app.utils.doc_fill import fill_template
 from pydantic import BaseModel
@@ -74,15 +73,15 @@ def generate_doc(
         ))
         db.commit()
 
-        return FileResponse(
-            path,
-            filename=filename,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        # ✅ Return public S3 download URL
+        s3_url = f"https://{os.getenv('S3_BUCKET_NAME')}.s3.{os.getenv('AWS_REGION')}.amazonaws.com/{filename}"
+        return {"download_url": s3_url}
 
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
+
+
 
 
 
