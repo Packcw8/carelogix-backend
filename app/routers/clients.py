@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from uuid import uuid4
 
 from app.database import get_db
-from app.models import Client
+from app.models import Client  # ✅ Correct import if it's in client.py
+
 from app.auth.auth_dependencies import get_current_user
 
 router = APIRouter()
