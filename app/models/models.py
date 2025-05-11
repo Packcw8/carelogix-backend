@@ -16,4 +16,6 @@ class User(Base):
     full_name = Column(String)
     agency_id = Column(String, ForeignKey("agencies.id"))
     is_admin = Column(Boolean, default=False)
+    pay_tier = Column(String, default="Tier 1")  # 👈 Add this line
     agency = relationship("Agency", back_populates="users")
+
