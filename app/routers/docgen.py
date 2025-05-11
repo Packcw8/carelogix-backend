@@ -10,7 +10,8 @@ from uuid import uuid4
 from datetime import datetime
 import os
 import re
-import traceback  # ✅ Add this to log detailed errors
+import traceback
+from docxtpl import RichText, InlineImage  # ✅ Needed for type check
 
 router = APIRouter()
 
@@ -38,10 +39,15 @@ def generate_doc(
         sig_val = data.context.get("signature", "")
         print("🔍 Signature type:", "Image" if sig_val.startswith("data:image") else "Typed")
 
-        # ✅ Generate the document using the clean filename
+        # ✅ Generate the document
         path = fill_template(data.template_name, data.context, filename)
 
-        # ✅ Store in database using clean name
+        # ✅ Strip RichText or InlineImage for DB-safe storage
+        clean_context = dict(data.context)
+        if isinstance(clean_context.get("signature"), (RichText, InlineImage)):
+            clean_context["signature"] = "Signed"  # Or typed name, or empty
+
+        # ✅ Save the submission to DB
         form_id = str(uuid4())
         db.add(FormSubmission(
             id=form_id,
@@ -50,7 +56,7 @@ def generate_doc(
             file_path=filename,
             case_name=data.context.get("case_name"),
             case_number=data.context.get("case_number"),
-            context=data.context,
+            context=clean_context,  # ✅ Safe JSON version
         ))
         db.commit()
 
@@ -59,9 +65,11 @@ def generate_doc(
             filename=filename,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
     except Exception as e:
-        traceback.print_exc()  # ✅ Print full backend error to logs
+        traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
