@@ -9,6 +9,7 @@ from app.database import Base, engine, SessionLocal
 from app.models import User, Agency
 from app.routers import register, login, protected, docgen, forms
 from app.routers.documents import router as document_router
+from app.routers import admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +39,7 @@ app.include_router(protected.router)
 app.include_router(docgen.router)
 app.include_router(document_router)
 app.include_router(forms.router)
+app.include_router(admin.router)
 
 print("🚀 FastAPI server is running and ready.")
 
