@@ -13,7 +13,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 def fill_template(template_name: str, context: dict, output_filename: str) -> str:
     template_path = os.path.abspath(os.path.join(TEMPLATE_DIR, template_name))
 
-    print("🧩 Looking for template at:", template_path)  # ✅ debug path log
+    print("🧩 Looking for template at:", template_path)
 
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template not found: {template_path}")
@@ -23,17 +23,17 @@ def fill_template(template_name: str, context: dict, output_filename: str) -> st
     signature = context.get("signature", "")
 
     if signature.startswith("data:image"):
-        # It's a base64 image — convert to InlineImage
         image_data = signature.split(",")[1]
         image = Image.open(BytesIO(base64.b64decode(image_data)))
         buffer = BytesIO()
         image.save(buffer, format="PNG")
-        context["signature"] = InlineImage(doc, buffer, width=Mm(50))  # You can adjust width
+        context["signature"] = InlineImage(doc, buffer, width=Mm(50))  # Adjust width as needed
     elif isinstance(signature, str) and signature.strip():
-        # It's typed text — convert to RichText with blue cursive font
         rt = RichText()
-        rt.add(signature, color="0000FF", font="Segoe Script")  # Cursive & blue
+        rt.add(signature, color="0000FF", font="Segoe Script")  # Blue cursive
         context["signature"] = rt
+    else:
+        context["signature"] = ""  # ✅ Prevent template crash if signature is empty
 
     doc.render(context)
 
