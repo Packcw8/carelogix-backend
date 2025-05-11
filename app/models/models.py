@@ -8,6 +8,7 @@ class Agency(Base):
     name = Column(String, unique=True, index=True)
     users = relationship("User", back_populates="agency")
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(String, primary_key=True, index=True)
@@ -16,8 +17,10 @@ class User(Base):
     full_name = Column(String)
     agency_id = Column(String, ForeignKey("agencies.id"))
     is_admin = Column(Boolean, default=False)
-    pay_tier = Column(String, default="Tier 1")  # 👈 Add this line
+    pay_tier = Column(String, default="Tier 1")
+
     agency = relationship("Agency", back_populates="users")
+    clients = relationship("Client", back_populates="user", cascade="all, delete")  # ✅ ADD THIS
 
 
 class Client(Base):
