@@ -19,3 +19,13 @@ class User(Base):
     pay_tier = Column(String, default="Tier 1")  # 👈 Add this line
     agency = relationship("Agency", back_populates="users")
 
+
+class Client(Base):
+    __tablename__ = "clients"
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    case_name = Column(String)
+    case_number = Column(String)
+    client_number = Column(String)
+
+    user = relationship("User", back_populates="clients")
