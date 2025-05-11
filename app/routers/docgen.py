@@ -33,6 +33,10 @@ def generate_doc(
         service_date = sanitize_filename(data.context.get("service_date", datetime.now().strftime("%B %d %Y")))
         filename = f"{case_name}_{service_date}.docx"
 
+        # ✅ DEBUG LOG: Check what kind of signature we got
+        sig_val = data.context.get("signature", "")
+        print("🔍 Signature type:", "Image" if sig_val.startswith("data:image") else "Typed")
+
         # ✅ Generate the document using the clean filename
         path = fill_template(data.template_name, data.context, filename)
 
@@ -56,5 +60,6 @@ def generate_doc(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
