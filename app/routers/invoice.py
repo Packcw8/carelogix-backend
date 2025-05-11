@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.database import get_db
 from app.models.forms import FormSubmission
-from app.dependencies import get_current_user
+from app.auth.auth_dependencies import get_current_user
 
 router = APIRouter()
 
