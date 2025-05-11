@@ -52,11 +52,12 @@ def generate_invoice(
         ctx = sub.context
         client = ctx.get("case_name", "Unknown")
         case_number = ctx.get("case_number", "Unknown")
+        client_number = ctx.get("client_number", "N/A")  # ✅ new
         service = ctx.get("service_provided", "Unknown")
         code = ctx.get("code", "Unknown")
 
         # Grouping key for merging same services
-        key = (client, case_number, service, code)
+        key = (client, case_number, client_number, service, code)
         units = calculate_units(ctx.get("start_time"), ctx.get("stop_time"))
         rate = TIER_PAY_RATES.get(tier, {}).get(service, 25)
 
@@ -64,6 +65,7 @@ def generate_invoice(
             service_tracker[key] = {
                 "client_name": client,
                 "case_number": case_number,
+                "client_number": client_number,  # ✅ new
                 "service": service,
                 "service_code": code,
                 "units": 0,
@@ -77,6 +79,7 @@ def generate_invoice(
             invoice_rows.append({
                 "client_name": client,
                 "case_number": case_number,
+                "client_number": client_number,
                 "service": "Mileage",
                 "service_code": "",
                 "units": float(ctx["miles"]),
@@ -86,6 +89,7 @@ def generate_invoice(
             invoice_rows.append({
                 "client_name": client,
                 "case_number": case_number,
+                "client_number": client_number,
                 "service": "ITT",
                 "service_code": "",
                 "units": int(ctx["itt_units"]),
@@ -95,6 +99,7 @@ def generate_invoice(
             invoice_rows.append({
                 "client_name": client,
                 "case_number": case_number,
+                "client_number": client_number,
                 "service": "MDT",
                 "service_code": "",
                 "units": int(ctx["tt_units"]),
@@ -122,3 +127,4 @@ def calculate_units(start, stop):
         return round(minutes / 15)
     except:
         return 0
+
