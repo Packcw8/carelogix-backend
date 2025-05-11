@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 import os
-from docx2pdf import convert  # ✅ New import
+import subprocess  # ✅ For LibreOffice conversion
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), '..', 'templates')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'generated_docs')
@@ -40,12 +40,16 @@ def fill_template(template_name: str, context: dict, output_filename: str) -> tu
     output_path = os.path.abspath(os.path.join(OUTPUT_DIR, output_filename))
     doc.save(output_path)
 
-    # Convert to PDF
+    # ✅ Convert to PDF using LibreOffice
     pdf_filename = output_filename.replace(".docx", ".pdf")
     pdf_path = os.path.abspath(os.path.join(OUTPUT_DIR, pdf_filename))
-    convert(output_path, pdf_path)  # ✅ docx2pdf conversion
 
-    return output_path, pdf_path  # ✅ Return both
+    subprocess.run([
+        "libreoffice",
+        "--headless",
+        "--convert-to", "pdf",
+        "--outdir", OUTPUT_DIR,
+        output_path
+    ], check=True)
 
-
-
+    return output_path, pdf_path
