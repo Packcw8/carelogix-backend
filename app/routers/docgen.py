@@ -10,6 +10,7 @@ from uuid import uuid4
 from datetime import datetime
 import os
 import re
+import traceback  # ✅ Add this to log detailed errors
 
 router = APIRouter()
 
@@ -46,7 +47,7 @@ def generate_doc(
             id=form_id,
             user_id=user.id,
             form_type=data.form_type,
-            file_path=filename,  # Only the filename, not full path
+            file_path=filename,
             case_name=data.context.get("case_name"),
             case_number=data.context.get("case_number"),
             context=data.context,
@@ -59,7 +60,9 @@ def generate_doc(
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
     except Exception as e:
+        traceback.print_exc()  # ✅ Print full backend error to logs
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
