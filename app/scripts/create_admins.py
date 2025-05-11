@@ -2,7 +2,7 @@
 import uuid
 from app.models import User, Agency
 from app.database import SessionLocal
-from passlib.hash import bcrypt
+from app.auth.auth_utils import hash_password  # ✅ Correct import
 
 # 🔧 Define the admins you want to create here
 admins_to_create = [
@@ -18,7 +18,6 @@ admins_to_create = [
         "full_name": "Bob Supervisor",
         "agency_name": "New Pathways"
     },
-    # Add more here
 ]
 
 db = SessionLocal()
@@ -36,11 +35,11 @@ for admin in admins_to_create:
         print(f"⚠️ User already exists: {admin['email']}")
         continue
 
-    # Create new admin
+    # ✅ Use hash_password from your auth_utils
     new_admin = User(
         id=str(uuid.uuid4()),
         email=admin["email"],
-        password_hash=bcrypt.hash(admin["password"]),
+        password_hash=hash_password(admin["password"]),
         full_name=admin["full_name"],
         is_admin=True,
         agency_id=agency.id
@@ -51,3 +50,4 @@ for admin in admins_to_create:
 db.commit()
 db.close()
 print("🏁 Admin creation complete.")
+
