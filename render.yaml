@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: carelogix-backend
+    runtime: python
+    buildCommand: |
+      apt-get update && apt-get install -y libreoffice && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: AWS_ACCESS_KEY_ID
+        fromEnvVar: AWS_ACCESS_KEY_ID
+      - key: AWS_SECRET_ACCESS_KEY
+        fromEnvVar: AWS_SECRET_ACCESS_KEY
+      - key: AWS_REGION
+        fromEnvVar: AWS_REGION
+      - key: S3_BUCKET_NAME
+        fromEnvVar: S3_BUCKET_NAME
+      - key: DATABASE_URL
+        fromEnvVar: DATABASE_URL
