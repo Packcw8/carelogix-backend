@@ -18,7 +18,7 @@ from app.routers import clients
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
-    agency_names = ["Bright Futures", "New Pathways", "Helping Hands"]
+    agency_names = ["Bright Futures", "New Pathways", "Helping Hands", "Uplifting Families"]
     for name in agency_names:
         if not db.query(Agency).filter_by(name=name).first():
             db.add(Agency(id=str(uuid.uuid4()), name=name))
