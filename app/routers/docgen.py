@@ -31,10 +31,18 @@ s3 = boto3.client(
     region_name=os.getenv('AWS_REGION')
 )
 
-# ✅ Upload without ACL (bucket has Object Ownership: Bucket owner enforced)
+# ✅ Upload with PDF handling (inline viewing)
 def upload_to_s3(file_path: str, filename: str):
     bucket = os.getenv('S3_BUCKET_NAME')
-    s3.upload_file(file_path, bucket, filename)
+    extra_args = {}
+
+    if filename.endswith(".pdf"):
+        extra_args = {
+            "ContentType": "application/pdf",
+            "ContentDisposition": "inline"
+        }
+
+    s3.upload_file(file_path, bucket, filename, ExtraArgs=extra_args)
 
 # ✅ Generate pre-signed S3 link
 def generate_presigned_url(filename: str) -> str:
@@ -64,7 +72,7 @@ def generate_doc(
         # ✅ Generate both DOCX and PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
 
-        # ✅ Upload both to S3 (no ACL)
+        # ✅ Upload both to S3 (PDF with inline headers)
         upload_to_s3(path_docx, filename_docx)
         upload_to_s3(path_pdf, filename_pdf)
 
@@ -95,9 +103,3 @@ def generate_doc(
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
-
-
-
-
-
-
