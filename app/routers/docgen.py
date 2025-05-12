@@ -31,9 +31,15 @@ s3 = boto3.client(
     region_name=os.getenv('AWS_REGION')
 )
 
+# ✅ Updated: upload with public-read ACL
 def upload_to_s3(file_path: str, filename: str):
     bucket = os.getenv('S3_BUCKET_NAME')
-    s3.upload_file(file_path, bucket, filename)
+    s3.upload_file(
+        file_path,
+        bucket,
+        filename,
+        ExtraArgs={"ACL": "public-read"}  # 👈 make file publicly viewable
+    )
 
 @router.post("/generate-doc")
 def generate_doc(
@@ -55,7 +61,7 @@ def generate_doc(
         # ✅ Generate both DOCX and PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
 
-        # ✅ Upload both to S3
+        # ✅ Upload both to S3 with public access
         upload_to_s3(path_docx, filename_docx)
         upload_to_s3(path_pdf, filename_pdf)
 
@@ -77,7 +83,7 @@ def generate_doc(
         ))
         db.commit()
 
-        # ✅ Return S3 URLs
+        # ✅ Return public S3 URLs
         bucket = os.getenv('S3_BUCKET_NAME')
         region = os.getenv('AWS_REGION')
         base_url = f"https://{bucket}.s3.{region}.amazonaws.com"
@@ -90,10 +96,6 @@ def generate_doc(
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
-
-
-
-
 
 
 
