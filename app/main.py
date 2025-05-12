@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -45,12 +46,13 @@ app.include_router(admin.router)
 app.include_router(invoice_router)
 app.include_router(clients.router)
 
-# ✅ Health check endpoint so Render sees 200 OK at /
-@app.get("/")
-def read_root():
-    return {"status": "ok"}
+# ✅ Health check endpoint for both GET and HEAD
+@app.api_route("/", methods=["GET", "HEAD"])
+def read_root(request: Request):
+    return JSONResponse(content={"status": "ok"})
 
 print("🚀 FastAPI server is running and ready.")
+
 
 
 
