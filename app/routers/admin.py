@@ -3,16 +3,14 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
 from app.models.forms import FormSubmission
-from app.auth.auth_dependencies import get_current_user  # adjust path if needed
+from app.auth.auth_dependencies import get_current_user
+from app.utils.s3 import generate_presigned_url  # ✅ adjust if needed
 
 router = APIRouter()
 
-# ✅ List all users in the same agency as the current admin
+# ✅ List all users in the same agency
 @router.get("/admin/users")
-def get_agency_users(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def get_agency_users(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -28,13 +26,9 @@ def get_agency_users(
         for user in users
     ]
 
-# ✅ View a specific user's submitted forms (admin-only)
+# ✅ Get a user's forms (admin view) with download links
 @router.get("/admin/users/{user_id}/forms")
-def get_user_forms_by_admin(
-    user_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def get_user_forms_by_admin(user_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -55,7 +49,9 @@ def get_user_forms_by_admin(
             "created_at": form.created_at,
             "case_name": form.case_name,
             "case_number": form.case_number,
-            "context": form.context,
+            "service_date": form.context.get("service_date") if isinstance(form.context, dict) else None,
+            "download_url_docx": generate_presigned_url(form.file_path),
+            "download_url_pdf": generate_presigned_url(form.file_path.replace(".docx", ".pdf")),
         }
         for form in forms
     ]
