@@ -59,11 +59,13 @@ def generate_doc(
     db: Session = Depends(get_db)
 ):
     try:
-        # ✅ Clean filenames
+        # ✅ Clean filenames and include form type
         case_name = sanitize_filename(data.context.get("case_name", "case"))
         service_date = sanitize_filename(data.context.get("service_date", datetime.now().strftime("%B %d %Y")))
-        filename_docx = f"{case_name}_{service_date}.docx"
-        filename_pdf = filename_docx.replace(".docx", ".pdf")
+        form_type_clean = sanitize_filename(data.form_type or "form")
+
+        filename_docx = f"{case_name}_{service_date}_{form_type_clean}.docx"
+        filename_pdf = f"{case_name}_{service_date}_{form_type_clean}.pdf"
 
         # ✅ Debug signature type
         sig_val = data.context.get("signature", "")
