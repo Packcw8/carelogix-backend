@@ -45,8 +45,13 @@ app.include_router(admin.router)
 app.include_router(invoice_router)
 app.include_router(clients.router)
 
+# ✅ Health check endpoint so Render sees 200 OK at /
+@app.get("/")
+def read_root():
+    return {"status": "ok"}
 
 print("🚀 FastAPI server is running and ready.")
+
 
 
 
