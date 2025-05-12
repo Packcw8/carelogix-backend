@@ -11,7 +11,7 @@ import os
 import re
 import traceback
 from docxtpl import RichText, InlineImage
-import boto3  # ✅ Boto3 for S3 integration
+import boto3
 
 router = APIRouter()
 
@@ -31,14 +31,17 @@ s3 = boto3.client(
     region_name=os.getenv('AWS_REGION')
 )
 
-# ✅ Updated: upload with public-read ACL
+# ✅ Upload without ACL (bucket has Object Ownership: Bucket owner enforced)
 def upload_to_s3(file_path: str, filename: str):
     bucket = os.getenv('S3_BUCKET_NAME')
-    s3.upload_file(
-        file_path,
-        bucket,
-        filename,
-        ExtraArgs={"ACL": "public-read"}  # 👈 make file publicly viewable
+    s3.upload_file(file_path, bucket, filename)
+
+# ✅ Generate pre-signed S3 link
+def generate_presigned_url(filename: str) -> str:
+    return s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={'Bucket': os.getenv('S3_BUCKET_NAME'), 'Key': filename},
+        ExpiresIn=3600  # 1 hour
     )
 
 @router.post("/generate-doc")
@@ -61,7 +64,7 @@ def generate_doc(
         # ✅ Generate both DOCX and PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
 
-        # ✅ Upload both to S3 with public access
+        # ✅ Upload both to S3 (no ACL)
         upload_to_s3(path_docx, filename_docx)
         upload_to_s3(path_pdf, filename_pdf)
 
@@ -83,19 +86,16 @@ def generate_doc(
         ))
         db.commit()
 
-        # ✅ Return public S3 URLs
-        bucket = os.getenv('S3_BUCKET_NAME')
-        region = os.getenv('AWS_REGION')
-        base_url = f"https://{bucket}.s3.{region}.amazonaws.com"
-
+        # ✅ Return pre-signed S3 URLs
         return {
-            "download_url_docx": f"{base_url}/{filename_docx}",
-            "download_url_pdf": f"{base_url}/{filename_pdf}"
+            "download_url_docx": generate_presigned_url(filename_docx),
+            "download_url_pdf": generate_presigned_url(filename_pdf)
         }
 
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
