@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, Body
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime, timedelta
 from app.database import get_db
 from app.models.forms import FormSubmission
-from app.models.models import Invoice
+from app.models.models import Invoice, User
 from app.auth.auth_dependencies import get_current_user
+from app.auth.role_dependencies import require_admin
 
 router = APIRouter()
 
@@ -125,6 +126,37 @@ def save_invoice(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to save invoice: {str(e)}")
+
+
+@router.get("/invoices/all")
+def get_all_agency_invoices(
+    db: Session = Depends(get_db),
+    current_admin=Depends(require_admin),
+):
+    try:
+        invoices = (
+            db.query(Invoice)
+            .join(User, Invoice.user_id == User.id)
+            .options(joinedload(Invoice.user))
+            .filter(User.agency_id == current_admin.agency_id)
+            .all()
+        )
+
+        return [
+            {
+                "invoice_id": inv.id,
+                "user_id": inv.user_id,
+                "provider_name": inv.user.full_name,
+                "start_date": inv.start_date,
+                "end_date": inv.end_date,
+                "total": inv.total,
+                "created_at": inv.created_at,
+                "data": inv.data,
+            }
+            for inv in invoices
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load invoices: {str(e)}")
 
 
 def calculate_units(start, stop):
