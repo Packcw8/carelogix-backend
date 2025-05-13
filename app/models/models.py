@@ -24,7 +24,9 @@ class User(Base):
 
     agency = relationship("Agency", back_populates="users")
     clients = relationship("Client", back_populates="user", cascade="all, delete")
-    referrals = relationship("Referral", back_populates="user", cascade="all, delete")  # ✅ REQUIRED
+    referrals = relationship("Referral", back_populates="user", cascade="all, delete")
+    invoices = relationship("Invoice", back_populates="user", cascade="all, delete")  # ✅ Add this line
+ # ✅ REQUIRED
 
 
 class Client(Base):
