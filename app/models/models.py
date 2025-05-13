@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
+import uuid
 
 class Agency(Base):
     __tablename__ = "agencies"
@@ -20,7 +21,8 @@ class User(Base):
     pay_tier = Column(String, default="Tier 1")
 
     agency = relationship("Agency", back_populates="users")
-    clients = relationship("Client", back_populates="user", cascade="all, delete")  # ✅ ADD THIS
+    clients = relationship("Client", back_populates="user", cascade="all, delete")
+    referrals = relationship("Referral", back_populates="user", cascade="all, delete")  # ✅ REQUIRED
 
 
 class Client(Base):
@@ -44,5 +46,3 @@ class Referral(Base):
     note = Column(String, nullable=True)
 
     user = relationship("User", back_populates="referrals")
-
-
