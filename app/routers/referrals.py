@@ -1,11 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
 from uuid import uuid4
+import os
 
 from app.models.referral import Referral
 from app.database import get_db
 from app.auth.auth_dependencies import get_current_user
-from app.utils.s3 import s3  # ✅ uses your existing s3 client
+from app.utils.s3 import s3, generate_presigned_url  # ✅ both S3 client & URL generator
 
 router = APIRouter()
 
@@ -23,7 +24,7 @@ async def upload_referral(
     bucket = os.getenv("S3_BUCKET_NAME")
     s3.upload_fileobj(file.file, bucket, s3_key)
 
-    # Save in database
+    # Save referral in database
     referral = Referral(
         user_id=user.id,
         filename=file.filename,
@@ -34,7 +35,7 @@ async def upload_referral(
     db.commit()
 
     return {"message": "Referral uploaded", "filename": file.filename}
-from app.utils.s3 import generate_presigned_url
+
 
 @router.get("/referrals/mine")
 def get_my_referrals(
