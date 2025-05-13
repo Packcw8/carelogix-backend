@@ -32,3 +32,17 @@ class Client(Base):
     client_number = Column(String)
 
     user = relationship("User", back_populates="clients")
+
+
+class Referral(Base):
+    __tablename__ = "referrals"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    filename = Column(String, nullable=False)
+    s3_key = Column(String, nullable=False)
+    note = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="referrals")
+
+
