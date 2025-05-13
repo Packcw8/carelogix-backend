@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from uuid import uuid4
 import os
 
-from app.models.referral import Referral
+from app.models.models import Referral
+
 from app.database import get_db
 from app.auth.auth_dependencies import get_current_user
 from app.utils.s3 import s3, generate_presigned_url  # ✅ both S3 client & URL generator
