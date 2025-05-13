@@ -158,6 +158,32 @@ def get_all_agency_invoices(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load invoices: {str(e)}")
 
+@router.get("/invoices/mine")
+def get_my_invoices(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    try:
+        invoices = (
+            db.query(Invoice)
+            .filter(Invoice.user_id == current_user.id)
+            .order_by(Invoice.created_at.desc())
+            .all()
+        )
+
+        return [
+            {
+                "invoice_id": inv.id,
+                "start_date": inv.start_date,
+                "end_date": inv.end_date,
+                "total": inv.total,
+                "created_at": inv.created_at,
+                "data": inv.data,
+            }
+            for inv in invoices
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load your invoices: {str(e)}")
 
 def calculate_units(start, stop):
     if not start or not stop:
