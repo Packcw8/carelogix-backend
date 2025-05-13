@@ -13,6 +13,8 @@ from app.routers.documents import router as document_router
 from app.routers import admin
 from app.routers.invoice import router as invoice_router
 from app.routers import clients
+from app.routers import referrals
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,6 +47,8 @@ app.include_router(forms.router)
 app.include_router(admin.router)
 app.include_router(invoice_router)
 app.include_router(clients.router)
+app.include_router(referrals.router)
+
 
 # ✅ Health check endpoint for both GET and HEAD
 @app.api_route("/", methods=["GET", "HEAD"])
