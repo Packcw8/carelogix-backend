@@ -1,7 +1,9 @@
-from sqlalchemy import Column, String, Boolean, ForeignKey
+from sqlalchemy import Column, String, Boolean, ForeignKey, Integer, Float, Date, DateTime, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
+from datetime import datetime
+
 
 class Agency(Base):
     __tablename__ = "agencies"
@@ -46,3 +48,16 @@ class Referral(Base):
     note = Column(String, nullable=True)
 
     user = relationship("User", back_populates="referrals")
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    total = Column(Float)
+    data = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="invoices")
