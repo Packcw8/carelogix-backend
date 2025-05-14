@@ -184,6 +184,25 @@ def get_my_invoices(
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load your invoices: {str(e)}")
+from fastapi import Path
+
+@router.delete("/invoices/delete/{invoice_id}")
+def delete_invoice(
+    invoice_id: str = Path(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    invoice = db.query(Invoice).filter(
+        Invoice.id == invoice_id,
+        Invoice.user_id == current_user.id
+    ).first()
+
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found or unauthorized.")
+
+    db.delete(invoice)
+    db.commit()
+    return {"message": "Invoice deleted"}
 
 def calculate_units(start, stop):
     if not start or not stop:
