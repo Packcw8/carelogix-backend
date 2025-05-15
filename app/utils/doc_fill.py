@@ -1,7 +1,6 @@
 import os
 import subprocess
 from datetime import datetime
-from uuid import uuid4
 from docxtpl import DocxTemplate
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "templates")
@@ -15,7 +14,7 @@ def fill_template(template_name: str, context: dict, output_filename: str = None
     doc = DocxTemplate(template_path)
     doc.render(context)
 
-    # 🧠 Use service_date in filename if available
+    # 🧠 Use service_date in filename if provided
     if not output_filename:
         service_date = context.get("service_date")
         try:
@@ -30,7 +29,7 @@ def fill_template(template_name: str, context: dict, output_filename: str = None
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     doc.save(output_path)
 
-    # 📤 Try converting to PDF with LibreOffice (optional)
+    # Try to convert to PDF using LibreOffice
     pdf_path = ""
     try:
         subprocess.run([
@@ -41,9 +40,7 @@ def fill_template(template_name: str, context: dict, output_filename: str = None
             output_path
         ], check=True)
         pdf_path = os.path.abspath(os.path.join(OUTPUT_DIR, output_filename.replace(".docx", ".pdf")))
-    except FileNotFoundError:
-        print("⚠️ LibreOffice not found — skipping PDF conversion.")
-    except subprocess.CalledProcessError:
-        print("⚠️ LibreOffice failed to convert to PDF.")
+    except Exception:
+        pass  # Silently skip if LibreOffice not available or fails
 
     return output_path, pdf_path
