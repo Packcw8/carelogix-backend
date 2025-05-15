@@ -3,11 +3,14 @@ from pydantic import BaseModel
 from app.auth.auth_dependencies import get_current_user
 import openai
 import os
+import traceback
 
 router = APIRouter()
 
+
 class NoteInput(BaseModel):
     content: str
+
 
 @router.post("/ai/clean-note")
 async def clean_note(input: NoteInput, user=Depends(get_current_user)):
@@ -41,6 +44,8 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
 
         cleaned = response.choices[0].message.content.strip()
         return {"cleaned": cleaned}
+
     except Exception as e:
         print("❌ GPT CLEAN ERROR:", str(e))
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"AI cleanup failed: {str(e)}")
