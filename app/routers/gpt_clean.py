@@ -16,7 +16,7 @@ class NoteInput(BaseModel):
 @router.post("/ai/clean-note")
 async def clean_note(input: NoteInput, user=Depends(get_current_user)):
     try:
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
         prompt = f"""
         You are a documentation assistant helping a family services provider summarize a supervised visit.
@@ -36,7 +36,7 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
         ---
         """
 
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.4,
