@@ -1,16 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11
 
-# Install LibreOffice and system dependencies
-RUN apt-get update && apt-get install -y libreoffice curl && rm -rf /var/lib/apt/lists/*
-
-# Create working directory
 WORKDIR /app
-
-# Copy your code
 COPY . /app
 
-# Install Python packages
+# 🔥 Force uninstall any old version of OpenAI, then clean-install the right one
+RUN pip uninstall -y openai && pip install --no-cache-dir openai==1.14.3
+
+# 🧱 Install remaining dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Run the app
+# ✅ Start the FastAPI app with uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
