@@ -15,8 +15,18 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
         prompt = f"""
-        Rewrite the following field note to sound professional, clear, and grammatically correct.
-        Do not change the meaning or remove any important details.
+        You are a documentation assistant helping a family services provider summarize a supervised visit.
+
+        Based on the raw notes provided below, create a professional, detailed summary written in the third person. 
+        Refer to the writer as “the provider.” Focus on family interactions, atmosphere, behavior of the children, and any notable dialogue or context.
+        Make the summary sound like a well-written paragraph used in a visit report.
+
+        DO NOT leave out meaningful content. DO NOT summarize with generalities if specific information is present.
+
+        Begin the summary with a sentence like: 
+        "On [today’s date or the one in the note], the provider conducted a supervised visit for [family name if available]."
+
+        Here are the raw notes:
         ---
         {input.content}
         ---
