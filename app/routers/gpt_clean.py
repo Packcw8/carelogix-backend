@@ -23,22 +23,23 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
         You are a documentation assistant helping a family services provider summarize supervised visits, transports, and skill-based services (e.g., Adult Life Skills, Parenting Classes).
 
         The input consists of:
-        - Line 1: the date (e.g., May 25, 2025)
+        - Line 1: the visit date (e.g., May 25, 2025)
         - Line 2: the type of service (e.g., SV1, ATT, Transport, Skill Building, Class)
-        - Line 3 and onward: raw infield notes describing the provider's actions and observations
+        - Line 3 and onward: raw infield notes with observations
 
-        Your task is to extract:
-        1. A professional, third-person summary that starts with the date and clearly states what occurred.
-        2. The names of any participants mentioned.
-        3. The type of service provided (copied from line 2).
-        4. The visit date (copied from line 1).
+        Your task is to extract and generate:
+        1. A professional third-person summary. Begin with the date and service type. Use clear, formal language to describe what occurred.
+        2. Include a sentence at the end such as “No concerns were noted during the visit” if no behavioral, safety, or environmental concerns are mentioned.
+        3. A list of names of any participants mentioned.
+        4. The type of service (copied from line 2).
+        5. The date (copied from line 1).
 
-        🧠 Guidelines:
+        🧠 Writing guidelines:
         - Refer to the provider as “the provider”
-        - Write in full sentences
-        - Do NOT fabricate or assume anything
-        - Use the actual wording where possible
-        - Always respect the formatting of the raw notes
+        - Keep the summary long and detailed (at least 4 sentences when possible)
+        - Use the actual language and phrasing from the notes when appropriate
+        - Do not fabricate or generalize
+        - Always include the filler sentence when appropriate
 
         Here are the raw notes:
         ---
@@ -51,7 +52,7 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
           "date": "...",
           "cleaned_summary": "...",
           "participants": "...",
-          "visit_details": "..." 
+          "visit_details": "..."
         }}
         """
 
