@@ -20,34 +20,40 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
         prompt = f"""
-You are a documentation assistant helping a family services provider summarize supervised visits, transports, and skill-based classes (e.g., Adult Life Skills, Parenting Classes, etc.).
+        You are a documentation assistant helping a family services provider summarize supervised visits, transports, and skill-based services (e.g., Adult Life Skills, Parenting Classes).
 
-Your task is to take the raw infield notes below and extract:
-1. A professional, fully detailed summary in the third person (refer to "the provider").
-2. A list of participants (names of family members, children, or others present).
-3. A short description of the service provided (e.g., supervised visit, parenting class, transport, etc.).
-4. The date the visit or service took place, if it is mentioned in the notes. If no date is mentioned, say "unknown".
+        The input consists of:
+        - Line 1: the date (e.g., May 25, 2025)
+        - Line 2: the type of service (e.g., SV1, ATT, Transport, Skill Building, Class)
+        - Line 3 and onward: raw infield notes describing the provider's actions and observations
 
-🧠 Guidelines:
-- Write a detailed summary based on all available information. DO NOT shorten or leave out meaningful content.
-- Do NOT fabricate or generalize.
-- The summary should start like:  
-  "On [extracted date or 'today'], the provider conducted a [visit/class/transport] for [family/client name]."
+        Your task is to extract:
+        1. A professional, third-person summary that starts with the date and clearly states what occurred.
+        2. The names of any participants mentioned.
+        3. The type of service provided (copied from line 2).
+        4. The visit date (copied from line 1).
 
-Here are the raw notes:
----
-{input.content}
----
+        🧠 Guidelines:
+        - Refer to the provider as “the provider”
+        - Write in full sentences
+        - Do NOT fabricate or assume anything
+        - Use the actual wording where possible
+        - Always respect the formatting of the raw notes
 
-Respond ONLY in this JSON format:
+        Here are the raw notes:
+        ---
+        {input.content}
+        ---
 
-{{
-  "date": "...",
-  "cleaned_summary": "...",
-  "participants": "...",
-  "visit_details": "..."
-}}
-"""
+        Respond ONLY in this JSON format:
+
+        {{
+          "date": "...",
+          "cleaned_summary": "...",
+          "participants": "...",
+          "visit_details": "..." 
+        }}
+        """
 
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
