@@ -1,55 +1,44 @@
-from docxtpl import DocxTemplate, InlineImage, RichText
-from docx.shared import Mm
-import base64
-from io import BytesIO
-from PIL import Image
 import os
-import subprocess  # ✅ For LibreOffice conversion
+import subprocess
+from datetime import datetime
+from uuid import uuid4
+from docxtpl import DocxTemplate
 
-TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), '..', 'templates')
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'generated_docs')
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "templates")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "generated_docs")
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-def fill_template(template_name: str, context: dict, output_filename: str) -> tuple[str, str]:
-    template_path = os.path.abspath(os.path.join(TEMPLATE_DIR, template_name))
-    print("🧩 Looking for template at:", template_path)
-
+def fill_template(template_name: str, context: dict) -> tuple[str, str]:
+    template_path = os.path.join(TEMPLATE_DIR, template_name)
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template not found: {template_path}")
 
     doc = DocxTemplate(template_path)
 
-    signature = context.get("signature", "")
-    if signature.startswith("data:image"):
-        image_data = signature.split(",")[1]
-        image = Image.open(BytesIO(base64.b64decode(image_data)))
-        buffer = BytesIO()
-        image.save(buffer, format="PNG")
-        context["signature"] = InlineImage(doc, buffer, width=Mm(50))
-    elif isinstance(signature, str) and signature.strip():
-        rt = RichText()
-        rt.add(signature, color="0000FF", font="Segoe Script")
-        context["signature"] = rt
-    else:
-        context["signature"] = ""
-
+    # Fill the template with the provided context
     doc.render(context)
 
-    # Save DOCX
-    output_path = os.path.abspath(os.path.join(OUTPUT_DIR, output_filename))
+    # Create a unique filename
+    filename_prefix = f"{context.get('case_name', 'note')}_{datetime.now().strftime('%b_%d__%Y')}".lower().replace(" ", "_")
+    output_filename = f"{filename_prefix}.docx"
+    output_path = os.path.join(OUTPUT_DIR, output_filename)
+
+    # Save the .docx
     doc.save(output_path)
 
-    # ✅ Convert to PDF using LibreOffice
-    pdf_filename = output_filename.replace(".docx", ".pdf")
-    pdf_path = os.path.abspath(os.path.join(OUTPUT_DIR, pdf_filename))
-
-    subprocess.run([
-        "libreoffice",
-        "--headless",
-        "--convert-to", "pdf",
-        "--outdir", OUTPUT_DIR,
-        output_path
-    ], check=True)
+    # Try to convert to PDF using LibreOffice (optional)
+    pdf_path = ""
+    try:
+        subprocess.run([
+            "libreoffice",
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", OUTPUT_DIR,
+            output_path
+        ], check=True)
+        pdf_path = os.path.abspath(os.path.join(OUTPUT_DIR, output_filename.replace(".docx", ".pdf")))
+    except FileNotFoundError:
+        print("⚠️ LibreOffice not found — skipping PDF conversion.")
+    except subprocess.CalledProcessError:
+        print("⚠️ LibreOffice failed to convert to PDF.")
 
     return output_path, pdf_path
