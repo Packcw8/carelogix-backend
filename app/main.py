@@ -14,6 +14,7 @@ from app.routers import admin
 from app.routers.invoice import router as invoice_router
 from app.routers import clients
 from app.routers import referrals
+from app.routers import infield_notes
 
 
 @asynccontextmanager
@@ -48,6 +49,7 @@ app.include_router(admin.router)
 app.include_router(invoice_router)
 app.include_router(clients.router)
 app.include_router(referrals.router)
+app.include_router(infield_notes.router)
 
 
 # ✅ Health check endpoint for both GET and HEAD
