@@ -32,4 +32,5 @@ async def clean_note(input: NoteInput, user=Depends(get_current_user)):
         cleaned = response.choices[0].message.content.strip()
         return {"cleaned": cleaned}
     except Exception as e:
+        print("❌ GPT CLEAN ERROR:", str(e))  # ✅ This will show in Render logs
         raise HTTPException(status_code=500, detail=f"AI cleanup failed: {str(e)}")
