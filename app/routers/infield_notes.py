@@ -28,7 +28,6 @@ def create_note(note: NoteCreate, db: Session = Depends(get_db), user=Depends(ge
     db.refresh(new_note)
     return new_note
 
-
 @router.get("/mine", response_model=List[NoteOut])
 def get_my_notes(db: Session = Depends(get_db), user=Depends(get_current_user)):
     return (
@@ -37,3 +36,14 @@ def get_my_notes(db: Session = Depends(get_db), user=Depends(get_current_user)):
         .order_by(InfieldNote.created_at.desc())
         .all()
     )
+
+@router.delete("/{note_id}")
+def delete_note(note_id: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    note = db.query(InfieldNote).filter(InfieldNote.id == note_id, InfieldNote.user_id == user.id).first()
+
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found or unauthorized.")
+
+    db.delete(note)
+    db.commit()
+    return {"message": "Note deleted"}
