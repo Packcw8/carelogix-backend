@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime
+from sqlalchemy import Column, String, Text, DateTime, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -13,4 +13,8 @@ class InfieldNote(Base):
     case_name = Column(String, nullable=False)
     case_number = Column(String, nullable=False)
     content = Column(Text, nullable=False)
+    cleaned_summary = Column(Text, nullable=True)
+    participants = Column(Text, nullable=True)
+    visit_details = Column(Text, nullable=True)
+    visit_date = Column(Date, nullable=True)  # ✅ New: AI-extracted date
     created_at = Column(DateTime, default=datetime.utcnow)
