@@ -5,6 +5,12 @@ import openai
 import os
 import traceback
 
+
+
+print("🔍 OpenAI SDK loaded from:", openai.__file__)
+print("🔢 OpenAI SDK version:", openai.__version__)
+
+
 router = APIRouter()
 
 
