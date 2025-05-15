@@ -7,25 +7,30 @@ from docxtpl import DocxTemplate
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "templates")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "generated_docs")
 
-def fill_template(template_name: str, context: dict) -> tuple[str, str]:
+def fill_template(template_name: str, context: dict, output_filename: str = None) -> tuple[str, str]:
     template_path = os.path.join(TEMPLATE_DIR, template_name)
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template not found: {template_path}")
 
     doc = DocxTemplate(template_path)
-
-    # Fill the template with the provided context
     doc.render(context)
 
-    # Create a unique filename
-    filename_prefix = f"{context.get('case_name', 'note')}_{datetime.now().strftime('%b_%d__%Y')}".lower().replace(" ", "_")
-    output_filename = f"{filename_prefix}.docx"
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
+    # 🧠 Use service_date in filename if available
+    if not output_filename:
+        service_date = context.get("service_date")
+        try:
+            date_obj = datetime.strptime(service_date, "%Y-%m-%d")
+            formatted_date = date_obj.strftime("%b_%d__%Y")
+        except Exception:
+            formatted_date = datetime.now().strftime("%b_%d__%Y")
 
-    # Save the .docx
+        filename_prefix = f"{context.get('case_name', 'note')}_{formatted_date}".lower().replace(" ", "_")
+        output_filename = f"{filename_prefix}.docx"
+
+    output_path = os.path.join(OUTPUT_DIR, output_filename)
     doc.save(output_path)
 
-    # Try to convert to PDF using LibreOffice (optional)
+    # 📤 Try converting to PDF with LibreOffice (optional)
     pdf_path = ""
     try:
         subprocess.run([
