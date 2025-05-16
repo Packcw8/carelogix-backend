@@ -23,7 +23,6 @@ class TemplateData(BaseModel):
 def sanitize_filename(text: str) -> str:
     return re.sub(r'[^a-z0-9]', '_', text.lower())
 
-# ✅ S3 client using env variables
 s3 = boto3.client(
     's3',
     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
@@ -31,20 +30,16 @@ s3 = boto3.client(
     region_name=os.getenv('AWS_REGION')
 )
 
-# ✅ Upload with PDF handling (inline viewing)
 def upload_to_s3(file_path: str, filename: str):
     bucket = os.getenv('S3_BUCKET_NAME')
     extra_args = {}
-
     if filename.endswith(".pdf"):
         extra_args = {
             "ContentType": "application/pdf",
             "ContentDisposition": "inline"
         }
-
     s3.upload_file(file_path, bucket, filename, ExtraArgs=extra_args)
 
-# ✅ Generate pre-signed S3 link
 def generate_presigned_url(filename: str) -> str:
     return s3.generate_presigned_url(
         ClientMethod='get_object',
@@ -59,14 +54,14 @@ def generate_doc(
     db: Session = Depends(get_db)
 ):
     try:
-        # ✅ Normalize service_date to YYYY-MM-DD
+        # ✅ Normalize service_date
         raw_date = data.context.get("service_date")
         if isinstance(raw_date, str) and "T" in raw_date:
             raw_date = raw_date.split("T")[0]
         elif not raw_date:
             raw_date = datetime.utcnow().strftime("%Y-%m-%d")
 
-        # ✅ Clean up values for filename
+        # ✅ Clean fields for filenames
         case_name = sanitize_filename(data.context.get("case_name", "case"))
         service_date_clean = sanitize_filename(raw_date)
         form_type_clean = sanitize_filename(data.form_type or "form")
@@ -78,19 +73,21 @@ def generate_doc(
         sig_val = data.context.get("signature", "")
         print("🔍 Signature type:", "Image" if sig_val.startswith("data:image") else "Typed")
 
-        # ✅ Generate DOCX and PDF
+        # ✅ Generate DOCX + PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
 
-        # ✅ Upload both to S3
+        # ✅ Upload to S3
         upload_to_s3(path_docx, filename_docx)
         upload_to_s3(path_pdf, filename_pdf)
 
-        # ✅ Clean context
+        # ✅ Clean up context before saving
         clean_context = dict(data.context)
         if isinstance(clean_context.get("signature"), (RichText, InlineImage)):
             clean_context["signature"] = "Signed"
 
-        # ✅ Save to DB with extracted service_date
+        # ✅ Extract summary separately
+        summary_text = data.context.get("summary", "")
+
         form_id = str(uuid4())
         db.add(FormSubmission(
             id=form_id,
@@ -100,6 +97,7 @@ def generate_doc(
             case_name=data.context.get("case_name"),
             case_number=data.context.get("case_number"),
             service_date=raw_date,
+            summary=summary_text,
             context=clean_context,
         ))
         db.commit()

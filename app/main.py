@@ -16,6 +16,10 @@ from app.routers import clients
 from app.routers import referrals
 from app.routers import infield_notes
 from app.routers import gpt_clean
+from app.routers import summaries
+
+
+
 
 
 @asynccontextmanager
@@ -56,6 +60,7 @@ app.include_router(clients.router)
 app.include_router(referrals.router)
 app.include_router(infield_notes.router)
 app.include_router(gpt_clean.router)
+app.include_router(summaries.router)
 
 
 # ✅ Health check endpoint for both GET and HEAD

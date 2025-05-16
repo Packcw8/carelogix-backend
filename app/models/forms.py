@@ -2,6 +2,8 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+from sqlalchemy import Text
+
 
 class FormSubmission(Base):
     __tablename__ = "form_submissions"
@@ -14,6 +16,7 @@ class FormSubmission(Base):
     case_number = Column(String, index=True)     # ✅ new
     context = Column(JSON)                       # ✅ new
     created_at = Column(DateTime, default=datetime.utcnow)
-
+    service_date = Column(String)  # Or Column(Date) if using proper date type
+    summary = Column(Text)  # Optional: use Text if longer
     user = relationship("User")
 
