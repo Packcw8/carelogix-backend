@@ -59,44 +59,51 @@ def generate_doc(
     db: Session = Depends(get_db)
 ):
     try:
-        # ✅ Clean filenames and include form type
+        # ✅ Normalize service_date to YYYY-MM-DD
+        raw_date = data.context.get("service_date")
+        if isinstance(raw_date, str) and "T" in raw_date:
+            raw_date = raw_date.split("T")[0]
+        elif not raw_date:
+            raw_date = datetime.utcnow().strftime("%Y-%m-%d")
+
+        # ✅ Clean up values for filename
         case_name = sanitize_filename(data.context.get("case_name", "case"))
-        service_date = sanitize_filename(data.context.get("service_date", datetime.now().strftime("%B %d %Y")))
+        service_date_clean = sanitize_filename(raw_date)
         form_type_clean = sanitize_filename(data.form_type or "form")
 
-        filename_docx = f"{case_name}_{service_date}_{form_type_clean}.docx"
-        filename_pdf = f"{case_name}_{service_date}_{form_type_clean}.pdf"
+        filename_docx = f"{case_name}_{service_date_clean}_{form_type_clean}.docx"
+        filename_pdf = f"{case_name}_{service_date_clean}_{form_type_clean}.pdf"
 
         # ✅ Debug signature type
         sig_val = data.context.get("signature", "")
         print("🔍 Signature type:", "Image" if sig_val.startswith("data:image") else "Typed")
 
-        # ✅ Generate both DOCX and PDF
+        # ✅ Generate DOCX and PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
 
-        # ✅ Upload both to S3 (PDF with inline headers)
+        # ✅ Upload both to S3
         upload_to_s3(path_docx, filename_docx)
         upload_to_s3(path_pdf, filename_pdf)
 
-        # ✅ Clean context for DB
+        # ✅ Clean context
         clean_context = dict(data.context)
         if isinstance(clean_context.get("signature"), (RichText, InlineImage)):
             clean_context["signature"] = "Signed"
 
-        # ✅ Save to DB
+        # ✅ Save to DB with extracted service_date
         form_id = str(uuid4())
         db.add(FormSubmission(
             id=form_id,
             user_id=user.id,
             form_type=data.form_type,
-            file_path=filename_docx,  # Store just the .docx path
+            file_path=filename_docx,
             case_name=data.context.get("case_name"),
             case_number=data.context.get("case_number"),
+            service_date=raw_date,
             context=clean_context,
         ))
         db.commit()
 
-        # ✅ Return pre-signed S3 URLs
         return {
             "download_url_docx": generate_presigned_url(filename_docx),
             "download_url_pdf": generate_presigned_url(filename_pdf)
