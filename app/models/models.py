@@ -37,7 +37,12 @@ class Client(Base):
     case_number = Column(String)
     client_number = Column(String)
 
+    # ✅ New fields
+    case_worker = Column(String)
+    worker_email = Column(String)
+
     user = relationship("User", back_populates="clients")
+
 
 
 class Referral(Base):
