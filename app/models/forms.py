@@ -1,9 +1,7 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, String, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
-from sqlalchemy import Text
-
 
 class FormSubmission(Base):
     __tablename__ = "form_submissions"
@@ -12,11 +10,14 @@ class FormSubmission(Base):
     user_id = Column(String, ForeignKey("users.id"))
     form_type = Column(String)
     file_path = Column(String)
-    case_name = Column(String, index=True)       # ✅ new
-    case_number = Column(String, index=True)     # ✅ new
-    context = Column(JSON)                       # ✅ new
+    case_name = Column(String, index=True)
+    case_number = Column(String, index=True)
+    client_number = Column(String, index=True)         # ✅ add this
+    participants = Column(Text)                        # ✅ add this
+    miles = Column(String)                             # ✅ add this
+    service_date = Column(String)                      # You can also use Date
+    summary = Column(Text)
+    context = Column(JSON)
     created_at = Column(DateTime, default=datetime.utcnow)
-    service_date = Column(String)  # Or Column(Date) if using proper date type
-    summary = Column(Text)  # Optional: use Text if longer
-    user = relationship("User")
 
+    user = relationship("User")

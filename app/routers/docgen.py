@@ -97,9 +97,13 @@ def generate_doc(
         if isinstance(clean_context.get("signature"), (RichText, InlineImage)):
             clean_context["signature"] = "Signed"
 
-        # ✅ Extract summary separately
+        # ✅ Extract summary and related data
         summary_text = data.context.get("summary", "")
+        client_number = data.context.get("client_number", "")
+        participants = data.context.get("participants", "")
+        miles = data.context.get("miles", "0")
 
+        # ✅ Save to FormSubmission
         form_id = str(uuid4())
         db.add(FormSubmission(
             id=form_id,
@@ -108,8 +112,11 @@ def generate_doc(
             file_path=filename_docx,
             case_name=data.context.get("case_name"),
             case_number=data.context.get("case_number"),
+            client_number=client_number,
             service_date=raw_date,
             summary=summary_text,
+            participants=participants,
+            miles=miles,
             context=clean_context,
         ))
         db.commit()
