@@ -3,26 +3,34 @@ from sqlalchemy.orm import Session
 from uuid import uuid4
 
 from app.database import get_db
-from app.models import Client  # ✅ Correct import if it's in client.py
-
+from app.models import Client
 from app.auth.auth_dependencies import get_current_user
+from pydantic import BaseModel
 
 router = APIRouter()
 
+# 🔹 Request model for creating a client
+class ClientCreate(BaseModel):
+    case_name: str
+    case_number: str
+    client_number: str
+    case_worker: str = ""
+    worker_email: str = ""
+
 @router.post("/clients")
 def add_client(
-    case_name: str,
-    case_number: str,
-    client_number: str,
+    client_data: ClientCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
     new_client = Client(
         id=str(uuid4()),
         user_id=current_user.id,
-        case_name=case_name,
-        case_number=case_number,
-        client_number=client_number,
+        case_name=client_data.case_name,
+        case_number=client_data.case_number,
+        client_number=client_data.client_number,
+        case_worker=client_data.case_worker,
+        worker_email=client_data.worker_email,
     )
     db.add(new_client)
     db.commit()
