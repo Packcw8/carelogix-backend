@@ -87,6 +87,7 @@ def generate_doc(
 
         # ✅ Generate DOCX + PDF
         path_docx, path_pdf = fill_template(data.template_name, data.context, filename_docx)
+        print("📂 Generated paths:", path_docx, path_pdf)
 
         # ✅ Upload to S3
         upload_to_s3(path_docx, filename_docx)
