@@ -13,6 +13,9 @@ import traceback
 from docxtpl import RichText, InlineImage
 import boto3
 
+# ✅ Add import
+from app.utils.summary_tools import fetch_summaries_and_services
+
 router = APIRouter()
 
 class TemplateData(BaseModel):
@@ -68,6 +71,15 @@ def generate_doc(
 
         filename_docx = f"{case_name}_{service_date_clean}_{form_type_clean}.docx"
         filename_pdf = f"{case_name}_{service_date_clean}_{form_type_clean}.pdf"
+
+        # ✅ Inject summaries and services if generating a Monthly Summary
+        if data.template_name == "monthlysummary.docx":
+            client_name = data.context.get("case_name")
+            client_number = data.context.get("case_number")
+            if client_name or client_number:
+                auto_summary, auto_services = fetch_summaries_and_services(client_name, client_number, db)
+                data.context["summaries"] = auto_summary
+                data.context["services"] = auto_services
 
         # ✅ Debug signature type
         sig_val = data.context.get("signature", "")
