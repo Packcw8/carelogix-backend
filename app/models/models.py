@@ -40,6 +40,9 @@ class Client(Base):
     # ✅ New fields
     case_worker = Column(String)
     worker_email = Column(String)
+    address = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
+    participants = Column(String, nullable=True)  # You could make this a Text column if needed
 
     user = relationship("User", back_populates="clients")
 
