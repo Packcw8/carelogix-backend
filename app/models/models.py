@@ -29,7 +29,8 @@ class User(Base):
  # ✅ REQUIRED
 
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 class Client(Base):
     __tablename__ = "clients"
@@ -37,14 +38,16 @@ class Client(Base):
     id = Column(Integer, primary_key=True, index=True)
     case_name = Column(String, nullable=False)
     case_number = Column(String, nullable=False)
-    client_number = Column(String, nullable=True)
+    client_number = Column(String, nullable=False)
 
-    # Allow nullable fields
     case_worker = Column(String, nullable=True)
     worker_email = Column(String, nullable=True)
     address = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
     participants = Column(String, nullable=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="clients")
 
 
 
