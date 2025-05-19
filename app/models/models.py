@@ -34,24 +34,25 @@ class User(Base):
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
+
+
 class Client(Base):
-    __tablename__ = "clients"
+        __tablename__ = "clients"
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    case_name = Column(String, nullable=False)
-    case_number = Column(String, nullable=False)
-    client_number = Column(String, nullable=False)
+        id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+        user_id = Column(String, ForeignKey("users.id"), nullable=False)
 
-    case_worker = Column(String, nullable=True)
-    worker_email = Column(String, nullable=True)
-    address = Column(String, nullable=True)
-    phone_number = Column(String, nullable=True)
-    participants = Column(String, nullable=True)
+        case_name = Column(String, nullable=False)
+        case_number = Column(String, nullable=False)
+        client_number = Column(String, nullable=False)
 
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="clients")
+        case_worker = Column(String, nullable=True)
+        worker_email = Column(String, nullable=True)
+        address = Column(String, nullable=True)
+        phone_number = Column(String, nullable=True)
+        participants = Column(String, nullable=True)
 
-
+        user = relationship("User", back_populates="clients")
 
 
 class Referral(Base):
