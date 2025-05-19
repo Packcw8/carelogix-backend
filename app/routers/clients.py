@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models import Client, User
-from app.auth_dependencies import get_current_user
+from app.auth.auth_dependencies import get_current_user
 
 router = APIRouter()
 
