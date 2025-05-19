@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
-
 from app.database import get_db
 from app.models import Client, User
 from app.auth.auth_dependencies import get_current_user
@@ -25,7 +24,7 @@ class ClientCreate(BaseModel):
 
 
 class ClientResponse(BaseModel):
-    id: int  # assuming integer ID, not UUID
+    id: str  # UUID string
     case_name: str
     case_number: str
     client_number: str
@@ -75,7 +74,7 @@ def get_clients(
 
 @router.delete("/clients/{client_id}")
 def delete_client(
-    client_id: int,
+    client_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
