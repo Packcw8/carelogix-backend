@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
+
 
 
 class Agency(Base):
@@ -35,7 +37,7 @@ from sqlalchemy.orm import relationship
 class Client(Base):
     __tablename__ = "clients"
 
-    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     case_name = Column(String, nullable=False)
     case_number = Column(String, nullable=False)
     client_number = Column(String, nullable=False)
