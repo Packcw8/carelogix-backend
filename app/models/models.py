@@ -29,22 +29,23 @@ class User(Base):
  # ✅ REQUIRED
 
 
+from sqlalchemy import Column, Integer, String
+
 class Client(Base):
     __tablename__ = "clients"
-    id = Column(String, primary_key=True, index=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    case_name = Column(String)
-    case_number = Column(String)
-    client_number = Column(String)
 
-    # ✅ New fields
-    case_worker = Column(String)
-    worker_email = Column(String)
+    id = Column(Integer, primary_key=True, index=True)
+    case_name = Column(String, nullable=False)
+    case_number = Column(String, nullable=False)
+    client_number = Column(String, nullable=True)
+
+    # Allow nullable fields
+    case_worker = Column(String, nullable=True)
+    worker_email = Column(String, nullable=True)
     address = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    participants = Column(String, nullable=True)  # You could make this a Text column if needed
+    participants = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="clients")
 
 
 
